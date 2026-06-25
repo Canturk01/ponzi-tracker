@@ -124,6 +124,18 @@ async def get_results(min_score: int = 0, limit: int = 50):
     return {"results": filtered[:limit], "total": len(filtered)}
 
 
+
+@app.post("/scan/ingest")
+async def ingest_result(result: dict):
+    """Dış scraper'dan gelen analiz sonucunu kabul eder."""
+    group = result.get("group", "unknown")
+    for i, r in enumerate(scan_results):
+        if r.get("group") == group:
+            scan_results[i] = result
+            return {"status": "updated", "group": group}
+    scan_results.append(result)
+    return {"status": "added", "group": group, "total": len(scan_results)}
+
 @app.get("/scan/results/{group_username}")
 async def get_group_result(group_username: str):
     """Belirli bir grubun detaylı sonucunu döner."""
