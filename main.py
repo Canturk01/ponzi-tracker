@@ -25,6 +25,7 @@ logger = logging.getLogger(__name__)
 
 # Ortam değişkenleri
 TELEGRAM_API_ID = int(os.getenv("TELEGRAM_API_ID", "0"))
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_API_HASH = os.getenv("TELEGRAM_API_HASH", "")
 ETHERSCAN_API_KEY = os.getenv("ETHERSCAN_API_KEY", "")
 RISK_THRESHOLD = int(os.getenv("RISK_THRESHOLD", "60"))
@@ -79,7 +80,7 @@ class WalletRequest(BaseModel):
 async def health():
     return {
         "status": "ok",
-        "telegram_configured": bool(TELEGRAM_API_ID and TELEGRAM_API_HASH),
+        "telegram_configured": bool(TELEGRAM_BOT_TOKEN),
         "etherscan_configured": bool(ETHERSCAN_API_KEY),
         "timestamp": datetime.now(timezone.utc).isoformat(),
     }
@@ -170,9 +171,10 @@ async def _run_scan_task(keywords: list[str], threshold: int, message_limit: int
         from telegram_scanner import TelegramScanner
 
         scanner_instance = TelegramScanner(
+            bot_token=TELEGRAM_BOT_TOKEN,
+            etherscan_key=ETHERSCAN_API_KEY,
             api_id=TELEGRAM_API_ID,
             api_hash=TELEGRAM_API_HASH,
-            etherscan_key=ETHERSCAN_API_KEY,
         )
         await scanner_instance.connect()
 
